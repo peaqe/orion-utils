@@ -1,0 +1,11 @@
+namespace: "orionuser1"
+name: "collection_dep_a1"
+version: "2.1113.36"
+description: "a collection with some deps on other collections"
+authors: ["Orion User 1"]
+license:
+  - "GPL-3.0-or-later"
+readme: "README.md"
+repository: http://github.example.com/orionuser1/collection_dep_a1
+tags:
+  - collectiontest

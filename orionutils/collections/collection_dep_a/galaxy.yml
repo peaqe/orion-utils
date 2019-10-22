@@ -1,0 +1,10 @@
+authors: [Orion User 1]
+dependencies: {}
+description: a collection with some deps on other collections
+license: [GPL-3.0-or-later]
+name: collection_dep_a
+namespace: orionuser1
+readme: README.md
+repository: http://github.example.com/orionuser1/collection_dep_a
+tags: [collectiontest]
+version: 1.0.0
