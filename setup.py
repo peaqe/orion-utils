@@ -6,13 +6,14 @@ from setuptools import find_packages, setup
 
 _project_root = os.path.abspath(os.path.dirname(__file__))
 
+
 # Get the long description from the README file
 with open(os.path.join(_project_root, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='orionutils',
-    version='0.1.0',
+    version='0.1.5',
     author='Red Hat PEAQE Team',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -45,5 +46,6 @@ setup(
     license='Apache',
     long_description=long_description,
     packages=find_packages(include=['orionutils*']),
+    include_package_data=True,
     url='https://github.com/peaqe/orion-utils/',
 )

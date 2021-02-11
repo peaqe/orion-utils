@@ -150,6 +150,7 @@ def build_collection(
     filename=None,
     key=None,
     pre_build=None,
+    extra_files=None,
 ):
     # TODO: Cleanup confusing three different names of "config"
 
@@ -157,7 +158,7 @@ def build_collection(
     if key != "":  # explicitly no key
         key = key or randstr(8)
 
-    # Copy from a collection template
+        # Copy from a collection template
         base = os.path.join(os.path.dirname(__file__), "collections", base)
         checkout = f"/tmp/{base}"
         cfg_file = os.path.join(checkout, "galaxy.yml")
@@ -189,6 +190,15 @@ def build_collection(
 
     else:
         logger.info(f"Building collection {name}")
+    
+    if extra_files:
+        for filename in extra_files:
+            dirpath = os.path.join(checkout, os.path.dirname(filename))
+            filepath = os.path.join(checkout, filename)
+            os.makedirs(dirpath, exist_ok=True)
+            with open(filepath, 'w', encoding='utf8') as f:
+                yaml.dump(extra_files[filename], f)
+            
 
     logger.info(f"build at {checkout}")
     # filename = cli.collection_build(checkout)
@@ -197,7 +207,7 @@ def build_collection(
     stdout, stderr = p.communicate()
     stdout = stdout.decode('utf8')
     m = re.search(r"([-_/\w\d\.]+\.tar\.gz)", stdout)
-    assert m
+    assert m, stdout
     filename = m.groups()[0]
     assert os.path.exists(filename)
 
