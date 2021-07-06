@@ -13,7 +13,7 @@ with open(os.path.join(_project_root, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='orionutils',
-    version='0.1.5',
+    version='0.1.6',
     author='Red Hat PEAQE Team',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -45,6 +45,7 @@ setup(
     ],
     license='Apache',
     long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(include=['orionutils*']),
     include_package_data=True,
     url='https://github.com/peaqe/orion-utils/',
