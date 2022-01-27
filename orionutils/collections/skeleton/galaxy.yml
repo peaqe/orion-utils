@@ -6,5 +6,5 @@ name: collection_dep_a
 namespace: orionuser1
 readme: README.md
 repository: http://github.example.com/orionuser1/skeleton
-tags: [collectiontest]
+tags: [tools]
 version: 1.0.0
