@@ -7,9 +7,12 @@ import re
 import shutil
 import string
 import subprocess
+import tempfile
 
 import attr
 import yaml
+
+from typing import Callable
 
 
 logger = logging.getLogger(__name__)
@@ -145,26 +148,61 @@ def randstr(length=8, seed=None):
 
 
 def build_collection(
-    base,
-    config=None,
-    filename=None,
-    key=None,
-    pre_build=None,
-    extra_files=None,
-):
+    base: str,
+    config: dict=None,
+    filename: str=None,
+    key: str=None,
+    pre_build: Callable=None,
+    extra_files: dict=None,
+) -> CollectionArtifact:
+    """Build and return a CollectionArtifact
+
+    Use a templated collection source to build an artifact.
+
+    Args:
+        base (str): The name of the template to use.
+        config (dict): A map of config values to put in galaxy.yml.
+        filename (str): Unused.
+        key (str): Added as a suffix to the collection name in galaxy.yml and used as an identifier
+                   in the CollectionArtifact object.
+        pre_build (Callable): A function to call with name,key,checkout before starting the build
+        extra_files (dict): A map of extra filenames and their yaml serializable content to create.
+
+    Returns:
+        artifact (CollectionArtifact): The data object defining the resulting filepath.
+
+    Possible base values:
+        collection_dep_a
+        collection_dep_a1
+        kitchensink
+        searchfixture
+        skeleton
+
+    Possible pre_build values:
+        CollectionSetup - adds additional files to the collection.
+
+    Notes:
+        The config parameter is used to define most aspects of the collection.
+        To define the version string for the collection, pass in config={'version': '1.2.3'}
+    """
     # TODO: Cleanup confusing three different names of "config"
 
+    galaxy_yaml_fn = None
+    checkout = None
     config = {} if config is None else config
+    name = None
+
     if key != "":  # explicitly no key
         key = key or randstr(8)
 
-        # Copy from a collection template
-        base = os.path.join(os.path.dirname(__file__), "collections", base)
-        checkout = f"/tmp/{base}"
-        cfg_file = os.path.join(checkout, "galaxy.yml")
-        if os.path.exists(checkout):
-            shutil.rmtree(checkout)
-        shutil.copytree(base, checkout)
+        source_path = os.path.join(os.path.dirname(__file__), "collections", base)
+        assert os.path.exists(source_path), f"{source_path} does not exist."
+        build_root = tempfile.mkdtemp(prefix='orion-utils-')
+        collections_path = os.path.join(build_root, "collections")
+        os.makedirs(collections_path)
+        checkout = os.path.join(collections_path, base)
+        shutil.copytree(source_path, checkout)
+        galaxy_yaml_fn = os.path.join(checkout, "galaxy.yml")
         name = base.replace("-", "_")
 
     # Optionally call a pre-build callback
@@ -173,8 +211,8 @@ def build_collection(
         pre_build(name, key, checkout)
 
     # Update the configuration of the collection
-    if os.path.exists(cfg_file):
-        with open(cfg_file) as f:
+    if galaxy_yaml_fn and os.path.exists(galaxy_yaml_fn):
+        with open(galaxy_yaml_fn) as f:
             cfg = yaml.safe_load(f)
         if key:
             name = f'{cfg["name"]}_{key}'
@@ -185,12 +223,12 @@ def build_collection(
         else:
             cfg["name"] = name
 
-        with open(cfg_file, "w", encoding="utf8") as f:
+        if not isinstance(cfg["version"], str):
+            raise ValueError("version must be a string")
+
+        with open(galaxy_yaml_fn, "w", encoding="utf8") as f:
             yaml.dump(cfg, f)
 
-    else:
-        logger.info(f"Building collection {name}")
-    
     if extra_files:
         for filename in extra_files:
             dirpath = os.path.join(checkout, os.path.dirname(filename))
@@ -198,18 +236,13 @@ def build_collection(
             os.makedirs(dirpath, exist_ok=True)
             with open(filepath, 'w', encoding='utf8') as f:
                 yaml.dump(extra_files[filename], f)
-            
 
-    logger.info(f"build at {checkout}")
-    # filename = cli.collection_build(checkout)
+    logger.info(f"Building collection {name} at {checkout}")
     cmd_str = f"ansible-galaxy collection build -vvv"
-    p = subprocess.Popen(cmd_str, cwd=checkout, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    stdout = stdout.decode('utf8')
+    p = subprocess.run(cmd_str, cwd=checkout, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout = p.stdout.decode('utf8')
     m = re.search(r"([-_/\w\d\.]+\.tar\.gz)", stdout)
     assert m, stdout
     filename = m.groups()[0]
     assert os.path.exists(filename)
-
-    assert isinstance(cfg["version"], str)
     return CollectionArtifact(key, cfg["namespace"], name, filename, cfg["version"])
