@@ -10,6 +10,9 @@ jobs:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
 
+      - name: list files
+        run: pwd; ls -al
+
       - name: run lint
         run: make test/lint
 
@@ -21,6 +24,9 @@ jobs:
         with:
           ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
           fetch-depth: 0  # include all history
+
+      - name: list files
+        run: pwd; ls -al
 
       - name: run unit tests
         run: make test/units
