@@ -4,7 +4,6 @@ import tarfile
 import pytest
 import orionutils
 from orionutils.generator import build_collection
-from orionutils.generator import CollectionSetup
 
 
 def artifact_peek(filename):
@@ -37,7 +36,9 @@ def test_build_collection_skeleton_with_key():
 
 
 def test_build_collection_skeleton_with_namespace_name_version():
-    artifact = build_collection("skeleton", config={"namespace": "foo", "name": "bar", "version": "5.5.5"})
+    artifact = build_collection(
+        "skeleton", config={"namespace": "foo", "name": "bar", "version": "5.5.5"}
+    )
     assert artifact is not None
     assert os.path.exists(artifact.filename)
     install_path = os.path.dirname(orionutils.__file__)
@@ -79,5 +80,5 @@ def test_build_collection_skeleton_with_extra_files():
 
 def test_build_collection_skeleton_with_integer_version():
     with pytest.raises(ValueError) as excinfo:
-        artifact = build_collection("skeleton", config={"version": 3})
+        build_collection("skeleton", config={"version": 3})
     assert str(excinfo.value) == "version must be a string"

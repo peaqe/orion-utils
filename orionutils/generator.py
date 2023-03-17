@@ -71,11 +71,11 @@ class CollectionSetup:
 
         if cfg:
             with open(path, "w") as f:
-                print(f"DOCUMENTATION='''", file=f)
-                print(f"---", file=f)
+                print("DOCUMENTATION='''", file=f)
+                print("---", file=f)
                 for key in cfg:
                     print(f"{key}: {cfg[key]}", file=f)
-                print(f"'''", file=f)
+                print("'''", file=f)
 
     def __call__(self, name, key, checkout):
         """Create a new collection, populating it with configured contents."""
@@ -149,11 +149,11 @@ def randstr(length=8, seed=None):
 
 def build_collection(
     base: str,
-    config: dict=None,
-    filename: str=None,
-    key: str=None,
-    pre_build: Callable=None,
-    extra_files: dict=None,
+    config: dict = None,
+    filename: str = None,
+    key: str = None,
+    pre_build: Callable = None,
+    extra_files: dict = None,
 ) -> CollectionArtifact:
     """Build and return a CollectionArtifact
 
@@ -238,8 +238,10 @@ def build_collection(
                 yaml.dump(extra_files[filename], f)
 
     logger.info(f"Building collection {name} at {checkout}")
-    cmd_str = f"ansible-galaxy collection build -vvv"
-    p = subprocess.run(cmd_str, cwd=checkout, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    cmd_str = "ansible-galaxy collection build -vvv"
+    p = subprocess.run(
+        cmd_str, cwd=checkout, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
     stdout = p.stdout.decode('utf8')
     m = re.search(r"([-_/\w\d\.]+\.tar\.gz)", stdout)
     assert m, stdout
