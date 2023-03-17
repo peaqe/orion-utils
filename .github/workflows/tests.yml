@@ -1,0 +1,37 @@
+name: orionutils tests
+on: {pull_request: {branches: ['**']}, push: {branches: ['**']}}
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: run lint
+        run: make test/lint
+
+  units:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.after }}  # for PR avoids checking out merge commit
+          fetch-depth: 0  # include all history
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: run unit tests
+        run: make test/units
+
