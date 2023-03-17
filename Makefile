@@ -1,7 +1,7 @@
 .PHONY: test/lint
 test/lint:
 	rm -rf /tmp/ovenv
-	python3 -m virtualenv /tmp/ovenv
+	python3.8 -m virtualenv /tmp/ovenv
 	#/tmp/ovenv/bin/pip install .
 	#/tmp/ovenv/bin/pip install pyyaml
 	/tmp/ovenv/bin/pip install -r test_requirements.txt
@@ -11,7 +11,7 @@ test/lint:
 .PHONY: test/units
 test/units:
 	rm -rf /tmp/ovenv
-	python3 -m virtualenv /tmp/ovenv
+	python3.8 -m virtualenv /tmp/ovenv
 	/tmp/ovenv/bin/pip install .
 	/tmp/ovenv/bin/pip install pyyaml
 	/tmp/ovenv/bin/pip install -r test_requirements.txt
