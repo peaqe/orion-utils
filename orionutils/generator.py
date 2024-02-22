@@ -177,6 +177,7 @@ def build_collection(
         kitchensink
         searchfixture
         skeleton
+        collection_with_content
 
     Possible pre_build values:
         CollectionSetup - adds additional files to the collection.
