@@ -193,6 +193,25 @@ def build_collection(
     config = {} if config is None else config
     name = None
 
+    # rename the docs files
+    try:
+        # The root path where the files are located, including the variable 'base'
+        root_path = f'orionutils/{base}/docs'
+        new_namespace = config['namespace']
+        new_collection = config['name']
+         
+        # Command to find and rename files safely
+        # It checks if the directory exists before attempting to find and rename files
+        command = f"""
+        if [ -d "{root_path}" ]; then
+            find "{root_path}" -type f -name 'namespace.collection.*' -exec bash -c 'mv "$0" "$(dirname "$0")/{new_namespace}.{new_collection}.$(basename "$0" | cut -d "." -f3-)"' {{}} \;
+        fi
+        """
+        subprocess.run(command, shell=True, check=True)
+        print("Files have been renamed successfully, if they existed.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+
     if key != "":  # explicitly no key
         key = key or randstr(8)
 
